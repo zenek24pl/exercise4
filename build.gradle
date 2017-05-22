@@ -9,7 +9,7 @@ repositories {
 
 ext {
     springVersion = '4.2.5.RELEASE'
-    activemqVersion = '5.13.2'
+    activemqVersion = '5.14.5'
 	log4jVersion = '2.5'
     junitVersion = '4.12'
 	
@@ -39,6 +39,7 @@ dependencies {
     compile "javax:javaee-api:7.0"
     compile libraries.spring
     compile libraries.log4j
+    compile libraries.activemqCore
     testCompile libraries.activemqCore
     testCompile "junit:junit:${junitVersion}"
 	testCompile "org.mockito:mockito-core:1.10.19"

@@ -1,8 +1,22 @@
 package wdsr.exercise4.receiver;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import wdsr.exercise4.PriceAlert;
+import wdsr.exercise4.VolumeAlert;
 import wdsr.exercise4.sender.JmsSender;
 
 /**
@@ -12,27 +26,69 @@ import wdsr.exercise4.sender.JmsSender;
  */
 public class JmsQueueReceiver {
 	private static final Logger log = LoggerFactory.getLogger(JmsQueueReceiver.class);
-	
+	private final String queueName;
+	private Connection connectionToBroker;
+	private Session session;
+	private MessageConsumer consumer;
 	/**
 	 * Creates this object
 	 * @param queueName Name of the queue to consume messages from.
 	 */
 	public JmsQueueReceiver(final String queueName) {
 		// TODO
+		this.queueName=queueName;
 	}
 
 	/**
 	 * Registers the provided callback. The callback will be invoked when a price or volume alert is consumed from the queue.
 	 * @param alertService Callback to be registered.
+	 * @throws JMSException 
 	 */
-	public void registerCallback(AlertService alertService) {
-		// TODO
+	public void registerCallback(AlertService alertService) throws JMSException {
+		ActiveMQConnectionFactory connectionFactory=new ActiveMQConnectionFactory("tcp://localhost:61616");
+		connectionToBroker = connectionFactory.createConnection();
+		connectionToBroker.start();
+		session = connectionToBroker.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Destination destination = session.createQueue("trades");
+		consumer = session.createConsumer(destination);
+		consumer.setMessageListener(new MessageListener() {
+			@Override
+			public void onMessage(Message message) {
+				String value;
+				try {
+					if(message.getJMSType()=="PriceAlert"){
+						PriceAlert priceAlert = null;
+						if (message instanceof TextMessage) {
+						    TextMessage text = (TextMessage) message;
+						    priceAlert=(PriceAlert)text.getBody(PriceAlert.class);
+							alertService.processPriceAlert(priceAlert);
+					}}
+					else{
+						VolumeAlert volumeAlert;
+						if(message instanceof ObjectMessage){
+							ObjectMessage object=(ObjectMessage)message;
+							volumeAlert=(VolumeAlert)object.getObject();
+							alertService.processVolumeAlert(volumeAlert);
+						}
+					}
+				
+				} catch (JMSException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 	
 	/**
 	 * Deregisters all consumers and closes the connection to JMS broker.
+	 * @throws JMSException 
 	 */
-	public void shutdown() {
+	public void shutdown() throws JMSException {
+		connectionToBroker.close();
+		session.close();
+		consumer.setMessageListener(null);
+		consumer.close();
+		
 		// TODO
 	}
 

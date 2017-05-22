@@ -9,6 +9,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
@@ -51,13 +52,13 @@ public class ReceiveTest {
 	}
 	
 	@After
-	public void tearDown() {
+	public void tearDown() throws JMSException {
 		service.shutdown();
 	}	
 	
 	@Test
 	@DirtiesContext
-	public void shouldReceiveFromQueue_whenPriceAlertObjectSent() throws InterruptedException {
+	public void shouldReceiveFromQueue_whenPriceAlertObjectSent() throws InterruptedException, JMSException {
 		// given
     	final long timestamp = System.currentTimeMillis();
     	final String stock = "GOOG";
@@ -81,7 +82,7 @@ public class ReceiveTest {
 	
 	@Test
 	@DirtiesContext
-	public void shouldReceiveFromQueue_whenVolumeAlertObjectSent() throws InterruptedException {
+	public void shouldReceiveFromQueue_whenVolumeAlertObjectSent() throws InterruptedException, JMSException {
 		// given
     	final long timestamp = System.currentTimeMillis();
     	final String stock = "GOOG";
@@ -105,7 +106,7 @@ public class ReceiveTest {
 	
 	@Test
 	@DirtiesContext
-	public void shouldReceiveFromQueue_whenPriceAlertTextSent() throws InterruptedException {
+	public void shouldReceiveFromQueue_whenPriceAlertTextSent() throws InterruptedException, JMSException {
 		// given
     	final long timestamp = System.currentTimeMillis();
     	final String stock = "GOOG";
@@ -132,7 +133,7 @@ public class ReceiveTest {
 	
 	@Test
 	@DirtiesContext
-	public void shouldReceiveFromQueue_whenVolumeAlertTextSent() throws InterruptedException {
+	public void shouldReceiveFromQueue_whenVolumeAlertTextSent() throws InterruptedException, JMSException {
 		// given
     	final long timestamp = System.currentTimeMillis();
     	final String stock = "GOOG";
@@ -159,7 +160,7 @@ public class ReceiveTest {
 	
 	@Test
 	@DirtiesContext
-	public void shouldReceiveAllFromQueue_whenMoreThanOneMessageSent() throws InterruptedException {
+	public void shouldReceiveAllFromQueue_whenMoreThanOneMessageSent() throws InterruptedException, JMSException {
 		// given
     	final long timestamp = System.currentTimeMillis();
     	final String stock1 = "GOOG";
